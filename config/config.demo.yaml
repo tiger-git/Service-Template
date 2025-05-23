@@ -1,0 +1,14 @@
+system:
+  app:
+    title: service name or title
+    docs_url: /docs
+    redoc_url: /redoc
+  log_level: info
+
+sdk_services:
+  mysql:
+    url: root:@localhost/**
+  redis:
+    url: redis://localhost:6379/0
+  aliyun_oss:
+    access_key_id: **
