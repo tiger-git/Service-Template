@@ -1,5 +1,5 @@
 
-import aioredis
+import redis
 
 from config import configure
 from utils.util_log import Log
@@ -14,11 +14,11 @@ class RedisHandler(object):
     """
 
     def __init__(self):
-        self.aioredis = None
+        self.redis_cli = None
 
     async def init_redis(self):
         """初始化 Redis 连接"""
-        self.aioredis = await aioredis.from_url(configure.redis_url)
+        self.redis_cli = await redis.asyncio.from_url(configure.redis_url,decode_responses=True)
 
 
 redis_handler: RedisHandler = RedisHandler()
