@@ -1,0 +1,19 @@
+# mysql configuration
+MYSQL_HOST=mysql
+MYSQL_USER=app
+MYSQL_PASSWORD=app123456
+MYSQL_DB=service_template
+...
+
+
+# redis configuration
+REDIS_HOST=redis
+...
+
+# application configuration
+APP_NAME=service_template
+DOCS_URL=/docs
+REDOCS_URL=/redocs
+LOG_LEVEL=info
+
+

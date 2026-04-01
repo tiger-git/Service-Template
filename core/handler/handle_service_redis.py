@@ -1,7 +1,7 @@
 
 import redis
 
-from config import configure
+from ..init_config import configure
 from utils.util_log import Log
 
 

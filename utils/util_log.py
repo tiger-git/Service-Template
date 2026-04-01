@@ -3,7 +3,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-from config import configure
+from core.init_config import configure
 
 class Log(logging.Logger):
     """
@@ -13,7 +13,7 @@ class Log(logging.Logger):
     FORMATTER: str = "%(asctime)s [%(levelname)s] [%(filename)s] [%(lineno)s] %(message)s"
 
     def __init__(self):
-        super(Log, self).__init__('open_torch', level=logging.INFO)
+        super(Log, self).__init__('open_torch', level=getattr(logging, configure.log_level.upper(), logging.INFO))
         # file
         self.addHandler(self.file_handler())
         # console

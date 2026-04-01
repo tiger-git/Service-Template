@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from .item_base import ItemBaseHost, ItemBaseSDKUrl
+from .item_base import ItemBaseSDKUrl
 
 
 class ItemConfigApp(BaseModel):
@@ -13,10 +13,6 @@ class ItemConfigSystem(BaseModel):
     log_level: str = Field('info')
 
 
-class ItemConfigDB(ItemBaseHost, ItemBaseSDKUrl):
-    port: int = Field(3306,description='service port')
-
-
 class ItemConfigServices(BaseModel):
-    mysql: ItemConfigDB = Field(...,description='mysql service config')
-    redis: ItemConfigDB = Field(...,description='redis service config')
+    mysql: ItemBaseSDKUrl = Field(...,description='mysql service config')
+    redis: ItemBaseSDKUrl = Field(...,description='redis service config')

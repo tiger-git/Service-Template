@@ -6,11 +6,6 @@ class ItemBaseSDKUrl(BaseModel):
                      description='sdk[redis/db/...] service connection url')
 
 
-class ItemBaseHost(BaseModel):
-    host: str = Field(
-        '', description='sdk[redis/db/...] service host[IP/domain name]')
-
-
 class ItemUserID(BaseModel):
     user_id: str = Field(..., description='user id')  # key hash
 

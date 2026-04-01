@@ -1,15 +1,18 @@
 import datetime
 
-from fastapi import FastAPI, Request
+from sqlalchemy import select
+
+from fastapi import FastAPI, Request,Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, HTMLResponse
 
-from config import configure
 from core.handler.handle_context_manager import context
 from core.handler.handle_service import ServiceError, error_response
 from core.handler.handle_service_redis import redis_handler
+from models.model_demo import IpInfo
+from models.base import SessionDep
 from core.items.enum_system import ErrorCodeEnum
 from utils.util_log import Log
 
@@ -20,7 +23,6 @@ app = FastAPI(
     lifespan=context,
     version="1.0.0",
     description="Web Service Template",
-    **configure.system.app.model_dump(mode="json"),
 )
 app.mount("/static", StaticFiles(directory="static"))
 templates = Jinja2Templates(directory="templates")
@@ -73,13 +75,24 @@ async def common_exception(request: Request, e: ServiceError):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+async def index(request: Request,db:SessionDep):
     current_time = await redis_handler.redis_cli.get("current_time")
     if not current_time:
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         await redis_handler.redis_cli.set("current_time", current_time, 60)
+    ip_address = request.client.host
+    ip_info = await db.execute(select(IpInfo).where(IpInfo.ip_address==ip_address))
+    if row:= ip_info.scalar_one_or_none():
+        row.updated_time = datetime.datetime.now()
+    else:
+        row = IpInfo(ip_address=ip_address)
+        db.add(row)
+    await db.commit()
+    await db.refresh(row)
+    rows = await db.execute(select(IpInfo).order_by(IpInfo.created_time))
+    data = rows.scalars().all()
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"current_time": current_time},
+        context={"current_time": current_time,"records":data},
     )

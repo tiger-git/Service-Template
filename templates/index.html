@@ -10,8 +10,26 @@
     <div style="text-align: center;">
         <h1>Welcome to my home</h1>
         <h5>{{current_time}}</h5>
+        <table border="1" style="margin: 0 auto; border-collapse: collapse; width: 80%;">
+        <thead>
+            <tr>
+                <th style="padding: 10px;">IP Address</th>
+                <th style="padding: 10px;">Last Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td style="padding: 8px;">{{ record.ip_address }}</td>
+                <td style="padding: 8px;">
+                    {{ record.updated_time.strftime('%Y-%m-%d %H:%M:%S %z') }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     </div>
-    <div style="text-align: center;"><img src="/static/home.png" height="600" ></div>
+    <div style="text-align: center;padding-top: 10px;"><img src="/static/home.png" height="600" ></div>
 </body>
 
 </html>

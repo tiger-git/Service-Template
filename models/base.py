@@ -7,7 +7,8 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.orm.session import Session
 
-from config import configure
+
+from core.init_config import configure
 
 engine = create_async_engine(
     f'mysql+aiomysql://{configure.mysql_url}',

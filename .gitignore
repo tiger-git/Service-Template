@@ -1,5 +1,6 @@
 poetry.lock
 *.pyc
-config/config.yaml
+config.yaml
 *.log
 .vscode
+.env
