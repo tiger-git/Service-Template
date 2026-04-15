@@ -40,6 +40,9 @@ class Configure(BaseSettings):
     redocs_url: str | None = Field(None, description="redocs url")
     log_level: str = Field("INFO", description="log level")
 
+    # mcp app config
+    mcp_app_name: str = Field("MCP_Service", description="mcp app name")
+
     @computed_field
     @property
     def log_file_name(self) -> str:

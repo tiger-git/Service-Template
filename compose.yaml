@@ -30,7 +30,7 @@ services:
   app:
     build:
       context: .                            # 构建上下文：当前目录
-      dockerfile: Dockerfile                # 指定 Dockerfile
+      dockerfile: Dockerfile-Web                # 指定 Dockerfile
     container_name: ${APP_NAME}
     restart: always
     # 这里的端口取决于你 Dockerfile 里 EXPOSE 的端口，通常是 8000
@@ -43,6 +43,24 @@ services:
         condition: service_started          # 确保 db 启动后再启动 app
       redis:
         condition: service_started
+  # 4. 应用服务 (MCP)
+  mcp_app:
+    build:
+      context: .                            # 构建上下文：当前目录
+      dockerfile: Dockerfile-MCP                # 指定 Dockerfile
+    container_name: ${MCP_APP_NAME}
+    restart: always
+    # 这里的端口取决于你 Dockerfile 里 EXPOSE 的端口，通常是 8000
+    ports:
+      - "8522:8000"
+    environment:
+      ENVIRONMENT: production
+    depends_on:
+      mysql:
+        condition: service_started          # 确保 db 启动后再启动 app
+      redis:
+        condition: service_started
+  
 
 volumes:
   mysql_data:

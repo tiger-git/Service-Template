@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, HTMLResponse
+from fastmcp.utilities.lifespan import combine_lifespans
 
 from core.handler.handle_context_manager import context
 from core.handler.handle_service import ServiceError, error_response
@@ -16,11 +17,13 @@ from models.base import SessionDep
 from core.items.enum_system import ErrorCodeEnum
 from utils.util_log import Log
 
+from .init_mcp import mcp_echo_app, mcp_weather_app
+
 
 logger = Log()
 
 app = FastAPI(
-    lifespan=context,
+    lifespan=combine_lifespans(context, mcp_echo_app.lifespan, mcp_weather_app.lifespan),
     version="1.0.0",
     description="Web Service Template",
 )
@@ -74,8 +77,17 @@ async def common_exception(request: Request, e: ServiceError):
     return JSONResponse(content=content)
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/", response_class=HTMLResponse,tags=["Demo"])
 async def index(request: Request,db:SessionDep):
+    """index page
+
+    Args:
+        request (Request): _description_
+        db (SessionDep): _description_
+
+    Returns:
+        _type_: _description_
+    """
     current_time = await redis_handler.redis_cli.get("current_time")
     if not current_time:
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")

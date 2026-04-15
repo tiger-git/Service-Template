@@ -1,47 +1,72 @@
-# Web Service Template
+# Web+MCP Service Template
 
 ## Getting started
 ### 配置
 * update .env,参考.env copy
 
-> **设计理念**
-> * 首推MSE/Nacos，搭配云端组件，尤其面向复杂、项目体量较大、配置化运营
->   * 多基于BaseModel，采用默认参数，支持配置修改即可
-> * 全部由.env托管维护，多级嵌套配置难维护，臃肿，可读性差
-> * 倾向改参数，更新部署即可应用，免打包
-
 ### 启动/部署
 ### Local
+#### 启动web
 ``` shell
 poetry install --no-root
 uvicorn main:app
 ```
+
+> **如果存在挂载mcp节点，对应节点访问类似如下：**
+> - http://127.0.0.1:8000/mcp/echo
+> - http://127.0.0.1:8000/mcp/weather
+> - ...
+
+#### 启动mcp【单节点启动】
+``` shell
+poetry install --no-root
+uvicorn main.py:mcp_web_app --transport=http --host=127.0.0.1 --port=8000
+```
+更多部署启动方式，参考 https://gofastmcp.com/cli/running
+
 ### Docker
 根据最终架构策略调整`compose.yaml`
 ```shell
 docker compose up -d
 ```
+* 针对mcp docker部署,仅需启动命令同步调整即可参考本地
 
+## 开发调试【MCP】
 
-## Description
-### 同步 or 异步？【仅个人观点】
-> 异步【基于协程】
-> * 优点
->    * 面向API,性能/速度相对会快一点
-> * 缺点
->    * 第三方package[组件/库]异步支持程度堪忧，如celery,但整体前景较好
+### 功能逻辑postman or MCP inspector
+step1 启动mcp server
+```shell
+fastmcp run main.py:mcp_web_app --transport=http --host=0.0.0.0
+```
+step2 基于官方MCP Inspector可视化界面
+```shell
+npx @modelcontextprotocol/inspector fastmcp run main.py:mcp_web_app --transport=http --host=0.0.0.0 # or npx @modelcontextprotocol/inspector http://localhost:8000/mcp
+```
+or postman
+```json
+{
+    "mcpServers": {
+        "mcp server": {
+            "url": "http://0.0.0.0:8000/mcp"
+        }
+    }
+}
+```
+### LLM集成训练
+- 主流AI 客户端工具，如calude code、copilot等，此处以免费的qwen code为例
+``` shell
+qwen
+qwen mcp add --transport http demo-server http://localhost:8000/mcp
+```
+- 参考文档 https://qwenlm.github.io/qwen-code-docs/zh/users/features/mcp/
 
-> 同步【基于多线程】
-> * 优点
->    * 第三方package[组件/库]，基本无缝衔接
-> * 缺点
->    * 遇到IO密集型，依赖更加优良的编程功底
+## 版本说明
 
-## 版本迭代
-没有最好的模版、只有更好的，或者自己用起来更顺手、项目契合度更高的
-### 1.1.0
-* 后续个人项目【Service】的模版方向
-* 自研项目，配置更多以.env为主
-    * 企业级可考虑.env结合MSE等云组件使用
-* docker 配置以及相关组件的运用推荐融入到开发中
-    * 类似K8s容器编排，偏运维方向，需要熟悉
+- 多数情况mcp/web不会共生，至少不会挤在一个服务，此处只为调研
+    -  web+mcp 同时提供HTTP/MCP协议，支持挂载多个mcp节点
+    - 支持基于已有web server,拓展支持MCP【fastapi/openapi.json依赖】
+        - 官方不建议挤在一起
+        - 支持指定接口转化，需自定义路由规则
+- lifespan共享生命周期，即redis、DB初始化一次即可
+- 有待探索...
+
