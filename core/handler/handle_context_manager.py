@@ -6,11 +6,8 @@ from fastmcp.server import FastMCP
 from fastmcp.server.lifespan import lifespan
 
 from core.handler import redis_handler
-from models.base import Base,engine
-from utils.util_log import Log
-
-
-logger = Log()
+from models.base import Base, engine
+from utils.util_log import logger
 
 
 @asynccontextmanager
@@ -31,8 +28,9 @@ async def context(app: FastAPI):
     logger.warning("stop app ing...")
     logger.warning("stop app finished")
 
+
 @lifespan
-async def mcp_app_context(app:FastMCP):
+async def mcp_app_context(app: FastMCP):
     """common context for mcp app, will be called when mcp app start and stop, can be used to init some resource like db connection, redis connection, etc.
 
     Args:

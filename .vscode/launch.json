@@ -8,8 +8,7 @@
             "name": "Server: FastMCP",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/.venv/bin/fastmcp", 
-            // "console": "integratedTerminal",
+            "program": "${workspaceFolder}/.venv/bin/fastmcp",
             "args": [
                 "run",
                 "main.py:mcp_web_app",
@@ -17,7 +16,10 @@
                 "--transport=http",
                 "--reload",
                 "--host=0.0.0.0"
-            ]
+            ],
+            "env": {
+                "PATH": "${workspaceFolder}/.venv/bin"
+            }
         },
         {
             "name": "Server: FastAPI",

@@ -2,7 +2,7 @@ import datetime
 
 from sqlalchemy import select
 
-from fastapi import FastAPI, Request,Depends
+from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.cors import CORSMiddleware
@@ -15,15 +15,15 @@ from core.handler.handle_service_redis import redis_handler
 from models.model_demo import IpInfo
 from models.base import SessionDep
 from core.items.enum_system import ErrorCodeEnum
-from utils.util_log import Log
+from utils.util_log import logger
 
 from .init_mcp import mcp_echo_app, mcp_weather_app
 
 
-logger = Log()
-
 app = FastAPI(
-    lifespan=combine_lifespans(context, mcp_echo_app.lifespan, mcp_weather_app.lifespan),
+    lifespan=combine_lifespans(
+        context, mcp_echo_app.lifespan, mcp_weather_app.lifespan
+    ),
     version="1.0.0",
     description="Web Service Template",
 )
@@ -77,8 +77,8 @@ async def common_exception(request: Request, e: ServiceError):
     return JSONResponse(content=content)
 
 
-@app.get("/", response_class=HTMLResponse,tags=["Demo"])
-async def index(request: Request,db:SessionDep):
+@app.get("/", response_class=HTMLResponse, tags=["Demo"])
+async def index(request: Request, db: SessionDep):
     """index page
 
     Args:
@@ -93,8 +93,8 @@ async def index(request: Request,db:SessionDep):
         current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         await redis_handler.redis_cli.set("current_time", current_time, 60)
     ip_address = request.client.host
-    ip_info = await db.execute(select(IpInfo).where(IpInfo.ip_address==ip_address))
-    if row:= ip_info.scalar_one_or_none():
+    ip_info = await db.execute(select(IpInfo).where(IpInfo.ip_address == ip_address))
+    if row := ip_info.scalar_one_or_none():
         row.updated_time = datetime.datetime.now()
     else:
         row = IpInfo(ip_address=ip_address)
@@ -106,5 +106,5 @@ async def index(request: Request,db:SessionDep):
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"current_time": current_time,"records":data},
+        context={"current_time": current_time, "records": data},
     )

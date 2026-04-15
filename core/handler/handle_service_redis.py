@@ -1,11 +1,7 @@
-
 import redis
 
 from ..init_config import configure
-from utils.util_log import Log
-
-
-logger = Log()
+from utils.util_log import logger
 
 
 class RedisHandler(object):
@@ -18,7 +14,9 @@ class RedisHandler(object):
 
     async def init_redis(self):
         """初始化 Redis 连接"""
-        self.redis_cli = await redis.asyncio.from_url(configure.redis_url,decode_responses=True)
+        self.redis_cli = await redis.asyncio.from_url(
+            configure.redis_url, decode_responses=True
+        )
 
 
 redis_handler: RedisHandler = RedisHandler()

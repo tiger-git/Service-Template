@@ -10,14 +10,20 @@ class Log(logging.Logger):
     日志配置
     """
     DATETIME_FORMAT: str = "%Y-%m-%d %H:%M:%S"
-    FORMATTER: str = "%(asctime)s [%(levelname)s] [%(filename)s] [%(lineno)s] %(message)s"
+    FORMATTER: str = "%(name)s %(asctime)s [%(levelname)s] [%(filename)s] [%(lineno)s] %(message)s"
 
     def __init__(self):
-        super(Log, self).__init__('open_torch', level=getattr(logging, configure.log_level.upper(), logging.INFO))
+        super(Log, self).__init__(configure.app_name or "service", level=getattr(logging, configure.log_level.upper(), logging.INFO))
         # file
         self.addHandler(self.file_handler())
         # console
         self.addHandler(self.console_handler())
+        # include other package log
+        # for name in ("fastmcp",):
+        #     log = logging.getLogger(name)
+        #     log.setLevel(configure.log_level.upper())
+        #     log.addHandler(self)
+      
 
     @staticmethod
     def file_handler():
@@ -45,3 +51,5 @@ class Log(logging.Logger):
         console_handler.setFormatter(logging.Formatter(
             Log.FORMATTER, datefmt=Log.DATETIME_FORMAT))
         return console_handler
+
+logger = Log()
