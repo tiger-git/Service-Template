@@ -1,3 +1,5 @@
+import os
+
 from typing import Type, Tuple
 
 from pydantic import Field, computed_field
@@ -40,6 +42,20 @@ class Configure(BaseSettings):
     redocs_url: str | None = Field(None, description="redocs url")
     log_level: str = Field("INFO", description="log level")
 
+    # ==== LLM config ===
+    openai_model: str = Field("gpt-5.4", description="OpenAI model name")
+    openai_api_key: str = Field(..., description="OpenAI API key")
+    openai_api_base: str = Field("https://api.openai.com/v1", description="OpenAI API base URL")
+
+    @computed_field
+    @property
+    def base_dir(self) -> str:
+        """
+        获取项目根目录
+        :return:
+        """
+        return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
     @computed_field
     @property
     def log_file_name(self) -> str:
@@ -75,7 +91,7 @@ class Configure(BaseSettings):
         url = f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db_index}"
         return url
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8",extra="ignore")
 
     @classmethod
     def settings_customise_sources(

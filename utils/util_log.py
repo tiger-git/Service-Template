@@ -45,3 +45,6 @@ class Log(logging.Logger):
         console_handler.setFormatter(logging.Formatter(
             Log.FORMATTER, datefmt=Log.DATETIME_FORMAT))
         return console_handler
+
+
+logger = Log()

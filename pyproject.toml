@@ -6,7 +6,7 @@ authors = [
     {name = "tiger19920910@163.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4.0.0"
 package-mode = false
 dependencies = [
     "fastapi (>=0.115.12,<0.116.0)",
@@ -18,10 +18,22 @@ dependencies = [
     "greenlet (>=3.2.2,<4.0.0)",
     "jinja2 (>=3.1.6,<4.0.0)",
     "redis (>=7.3.0,<8.0.0)",
-    "cryptography (>=46.0.6,<47.0.0)"
+    "cryptography (>=46.0.6,<47.0.0)",
+    "langchain-openai (>=1.3.4,<2.0.0)",
+    "langchain-core (>=1.4.9,<2.0.0)",
+    "pymilvus[model] (>=3.0.0,<4.0.0)",
+    "pymupdf (>=1.28.0,<2.0.0)",
+    "langchain-text-splitters (>=1.1.2,<2.0.0)",
+    "dashscope (>=1.26.3,<2.0.0)",
+    "langchain (>=1.3.13,<2.0.0)",
 ]
 
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "tsinghua"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+priority = "primary"
