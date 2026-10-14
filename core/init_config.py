@@ -75,7 +75,7 @@ class Configure(BaseSettings):
         url = f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db_index}"
         return url
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     @classmethod
     def settings_customise_sources(
