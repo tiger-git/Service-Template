@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from pydantic import BaseModel, Field
 
-from core.items.item_base import ItemUserID
+from core.items.item_base import ItemAccessToken, ItemRefreshToken, ItemUserEmail, ItemUserID, ItemUserNickName
 
 
 class ItemCommonResponse(BaseModel):
@@ -17,6 +17,14 @@ class ItemCommonResponse(BaseModel):
 class ItemUserRegisterResult(ItemUserID):
     pass
 
-
 class ItemUserRegisterResponse(ItemCommonResponse):
     data: ItemUserRegisterResult
+
+class ItemUserLoginResult(ItemUserID,ItemAccessToken,ItemRefreshToken):
+    pass
+
+class ItemUserInfoResult(ItemUserID,ItemUserNickName,ItemUserEmail):
+    pass
+
+class ItemUserInfoResponse(ItemCommonResponse):
+    data: ItemUserInfoResult

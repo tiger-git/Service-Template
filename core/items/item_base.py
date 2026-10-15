@@ -13,6 +13,12 @@ class ItemUserID(BaseModel):
 class ItemUserEmail(BaseModel):
     email: str = Field(..., description='user email')
 
+class ItemAccessToken(BaseModel):
+    access_token: str = Field(..., description='access token')
+
+class ItemRefreshToken(BaseModel):
+    refresh_token: str = Field(..., description='refresh token')
+
 
 class ItemUserCardNo(BaseModel):
     """用户真实性，避免机器人或恶意用户
@@ -22,4 +28,4 @@ class ItemUserCardNo(BaseModel):
 
 
 class ItemUserNickName(BaseModel):
-    nick_name: str = Field(..., description="user nick name")
+    nick_name: str = Field(None, description="user nick name")

@@ -1,5 +1,5 @@
-from .handle_service_redis import redis_handler
-from .handle_service import success_response, error_response, ServiceError
+from ..services.handle_service_redis import redis_handler
+from ..services.handle_service import success_response, error_response, ServiceError
 
 __all__ = [
     'redis_handler',

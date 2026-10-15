@@ -5,7 +5,6 @@ from fastapi import Depends
 from sqlalchemy import Column, DateTime
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-from sqlalchemy.orm.session import Session
 
 
 from core.init_config import configure
@@ -26,7 +25,7 @@ async def get_session():
         print(f"new db session {id(db)}")
         yield db
 
-SessionDep = Annotated[Session, Depends(get_session)]
+SessionDep = Annotated[AsyncSession, Depends(get_session)]
 
 
 def get_current_time(): return datetime.datetime.now(datetime.timezone.utc)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .controller.controller_demo import router as demo_router
+from .controller.controller_user import router as demo_router
 
 routers = APIRouter()
-routers.include_router(demo_router, tags=["Demo"])
+routers.include_router(demo_router, tags=["User"], prefix="/api/v1")
