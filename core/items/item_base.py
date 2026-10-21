@@ -29,3 +29,6 @@ class ItemUserCardNo(BaseModel):
 
 class ItemUserNickName(BaseModel):
     nick_name: str = Field(None, description="user nick name")
+
+
+

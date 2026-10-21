@@ -1,18 +1,18 @@
 from fastapi import APIRouter, HTTPException,Request
 from fastapi.params import Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from core.items.enum_system import ErrorCodeEnum
 from core.items.item_base import ItemRefreshToken
 from core.services.handle_service import success_response,error_response
 from core.items.item_request import ItemUserRegisterRequest
-from core.items.item_response import ItemUserInfoResponse, ItemUserInfoResult, ItemUserRegisterResponse, ItemUserRegisterResult, ItemUserLoginResult
+from core.items.item_response import ItemUserInfoResponse, ItemUserInfoResult, ItemUserListResult, ItemUserRegisterResponse, ItemUserRegisterResult, ItemUserLoginResult, UserListResponse
 from models.base import SessionDep
 from models.user import User
 from utils.util_log import Log
 from utils.util_object import get_uuid,generate_random_hex
-from core.handler.handler_user import check_password, generate_token_hash, get_current_user, hash_password,create_access_token,create_refresh_token, verify_refresh_token
+from core.handler.handler_user import RequireAccess, RequireRole, check_password, generate_token_hash, get_current_user, hash_password,create_access_token,create_refresh_token, verify_refresh_token
 from core.services.handle_service_redis import redis_handler
 from core.items.constant import REDIS_KEY_REFRESH_TOKENS
 logger = Log()
@@ -97,3 +97,37 @@ async def update_user_info(param: ItemUserRegisterRequest, session: SessionDep, 
     await session.commit()
     await session.refresh(user)
     return success_response(data=ItemUserInfoResult(user_id=user.key_hash, nick_name=user.nick_name, email=user.email))
+
+@router.delete("/user/delete", response_model=ItemUserRegisterResponse)
+async def delete_user(session: SessionDep, user_id: str = Depends(get_current_user)):
+    user = await session.scalar(select(User).filter(User.key_hash == user_id))
+    if not user:
+        raise HTTPException(status_code=400, detail="User not found")
+    await session.delete(user)
+    await session.commit()
+    return success_response(data=ItemUserRegisterResult(user_id=user.key_hash))
+
+@router.get("/users", response_model=UserListResponse,
+            #  dependencies=[Depends(RequireRole("admin"))]
+             dependencies=[Depends(RequireAccess("user:list"))]
+             )
+async def list_users(session: SessionDep,page: int = 1, page_size: int = 10,search: str = None):
+    offset = (page - 1) * page_size
+
+    # 构建基础查询
+    base_query = select(User)
+    if search:
+        base_query = base_query.where(
+            User.nick_name.contains(search) | User.email.contains(search)
+        )
+
+    # 查总数
+    count_query = select(func.count()).select_from(base_query.subquery())
+    total = await session.scalar(count_query)
+
+    # 查当前页数据
+    page_query = base_query.offset(offset).limit(page_size)
+    users = await session.scalars(page_query)
+    users = users.all()
+    user_list = [ItemUserInfoResult(user_id=user.key_hash, nick_name=user.nick_name, email=user.email) for user in users]
+    return success_response(data=ItemUserListResult(users=user_list, total=total))

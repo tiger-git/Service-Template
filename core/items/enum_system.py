@@ -19,3 +19,18 @@ class ErrorCodeEnum(Enum):
     SystemParamsError = '9001','system params error'
     SystemError = '9999','system unknown error'
 
+@unique
+class RoleEnum(Enum):
+    """
+    角色枚举
+    """
+    SuperAdmin = 'super_admin' # 超级管理员
+    Admin = 'admin' # 管理员
+    Normal = 'normal' # 普通用户
+
+@unique
+class AccessEnum(Enum):
+    """
+    权限枚举
+    """
+    UserDelete = 'user:delete' # 删除用户

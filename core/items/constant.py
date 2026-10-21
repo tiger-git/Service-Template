@@ -6,3 +6,4 @@ REFRESH_EXPIRE_DAYS = 1
 
 # ================================ redis key =================================
 REDIS_KEY_REFRESH_TOKENS = "REFRESH_TOKEN:{token}"
+REDIS_KEY_ROLE_ACCESSES = "role_accesses:{role_name}"

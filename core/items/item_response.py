@@ -28,3 +28,10 @@ class ItemUserInfoResult(ItemUserID,ItemUserNickName,ItemUserEmail):
 
 class ItemUserInfoResponse(ItemCommonResponse):
     data: ItemUserInfoResult
+
+class ItemUserListResult(BaseModel):
+    users: list[ItemUserInfoResult]
+    total: int = Field(..., description="Total number of users")
+
+class UserListResponse(ItemCommonResponse):
+    data: ItemUserListResult
