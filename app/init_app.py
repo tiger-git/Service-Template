@@ -10,7 +10,7 @@ from starlette.responses import JSONResponse, HTMLResponse
 
 from core.handler.handle_context_manager import context
 from core.handler.handle_service import ServiceError, error_response
-from core.handler.handle_service_redis import redis_handler
+from core.services.service_redis import redis_handler
 from models.model_demo import IpInfo
 from models.base import SessionDep
 from core.items.enum_system import ErrorCodeEnum

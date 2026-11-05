@@ -44,9 +44,16 @@ class Configure(BaseSettings):
 
     # ==== LLM config ===
     openai_model: str = Field("gpt-5.4", description="OpenAI model name")
-    openai_api_key: str = Field(..., description="OpenAI API key")
+    openai_api_key: str = Field("", description="OpenAI API key")
     openai_api_base: str = Field("https://api.openai.com/v1", description="OpenAI API base URL")
 
+    # ==== LLM-Bailian config ===
+    bailian_model: str = Field("qwen3.8-flash", description="bailian model name")
+    bailian_api_key: str = Field("", description="bailian API key")
+    bailian_api_base: str = Field("https://dashscope.aliyuncs.com/compatible-mode/v1", description="bailian API base URL")
+
+    # ==== local Models ===
+    local_model_path: str = Field("/home/tiger/models/", description="local model path")
     @computed_field
     @property
     def base_dir(self) -> str:
