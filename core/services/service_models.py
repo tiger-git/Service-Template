@@ -39,6 +39,8 @@ class BaseAI(object):
         Returns:
             str: _description_
         """
+        if content:=kwargs.get("content"):
+            return SystemMessage(content=content)
         content =  "# Role \n\n You are a helpful assistant.\n\n"
         return SystemMessage(content=content)
 
@@ -49,6 +51,8 @@ class BaseAI(object):
         Returns:
             str: _description_
         """
+        if content:= kwargs.get("content"):
+            return HumanMessagePromptTemplate.from_template(content)
         content =  "question:\n\n{question}\n\n"
         return HumanMessagePromptTemplate.from_template(content)
         # return HumanMessage(content=content) # 无法处理参数传递
