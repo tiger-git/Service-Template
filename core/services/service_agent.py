@@ -1,16 +1,17 @@
 import sqlite3
-from typing import Dict, Generic, List
+from typing import Any, Dict, Generic, Iterator, List
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI  # 或其他兼容 OpenAI 协议的模型
+from langchain_core.prompts import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain_core.messages import BaseMessage
 from pydantic import BaseModel
 from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.types import StateSnapshot,Command
 
-from core.handler.handler_tools import get_weather
-from core.init_config import configure
 from utils.util_log import logger
+from core.handler.handler_tools import get_weather,get_datetime,Decision
+from core.init_config import configure
 from core.services.service_models import ModelService, T
 from core.items.item_llm_response import LLMResponse, WeatherAgentResponse
 
@@ -20,7 +21,6 @@ from core.items.item_llm_response import LLMResponse, WeatherAgentResponse
 class AgentResponse(BaseModel, Generic[T]):
     structured_response: T | None
     messages: List[BaseMessage]
-
 
 class AgentService(ModelService[T]):
     def __init__(self, model, output_model, tools: List = []):
@@ -43,17 +43,29 @@ class AgentService(ModelService[T]):
             self._checkpoint = checkpointer
         return self._checkpoint
 
-    def run(self, params: Dict[str, str] = {}, **kwargs) -> AgentResponse[T]:
-        chat_prompt = ChatPromptTemplate.from_messages([self._human_prompt])
-        messages = chat_prompt.format_messages(**params)
-        result = self.agent.invoke({"messages": messages}, **kwargs)
+    def get_messages(self,params:Dict[str, str],content:str=None):
+        if content:
+            return HumanMessagePromptTemplate.from_template(content).format_messages(**params)
+        return self._human_prompt.format_messages(**params)
+
+    def get_format_agent_response(self,result) -> AgentResponse[T]:
         result = AgentResponse.model_validate(result)
         return result
+    
+    def get_state(self,thread_id:str,checkpoint_id:str=None,is_history=False)->StateSnapshot|Iterator[StateSnapshot]:
+        config = {"configurable": {"thread_id": thread_id}}
+        if is_history:
+            history_state = self.agent.get_state_history(config)
+            return history_state
+        if checkpoint_id:
+            config["configurable"]["checkpoint_id"] = checkpoint_id
+        current_state =  self.agent.get_state(config)
+        return current_state
 
 
 class ToolAgentService(AgentService[WeatherAgentResponse]):
     def __init__(self, model):
-        super().__init__(model, WeatherAgentResponse, [get_weather])
+        super().__init__(model, WeatherAgentResponse, [get_weather,get_datetime])
 
     @property
     def llm(self):
@@ -67,9 +79,24 @@ class ToolAgentService(AgentService[WeatherAgentResponse]):
 
 
 if __name__ == "__main__":
-    config = {"configurable": {"thread_id": "1"}}
-    demo = ToolAgentService(configure.bailian_model)
-    # result = demo.run({"question": "今天2026-11-5，西安接下来3天的天气如何?"},config=config)
-    result = demo.run({"question": "昨天什么天气?"}, config=config)
-    print(result)
+    thread_id = "8"
+    service = ToolAgentService(configure.bailian_model)
+    messages = service.get_messages({"question": "西安今天天气怎么样"})
+    result = service.agent.invoke({"messages":messages},config={"configurable": {"thread_id": thread_id}})
+    pending = result["__interrupt__"][0]
+    assert pending.response_schema == Decision.model_json_schema() # 实际场景阻塞等待响应
+    result = service.agent.invoke(Command(resume={"approved": True}), config={"configurable": {"thread_id": thread_id}})
+
+    # checkpoint 短期记忆
+    messages = service.get_messages({"question": "明天呢"})
+    result = service.agent.invoke({"messages":messages}, config={"configurable": {"thread_id": thread_id}})
+    pending = result["__interrupt__"][0]
+    assert pending.response_schema == Decision.model_json_schema()
+    result = service.agent.invoke(Command(resume={"approved": False}), config={"configurable": {"thread_id": thread_id}})
+    
+    # checkpoint 历史会话
+    state = service.get_state(thread_id,is_history=True)
+
+    # RAG
     # result = prompt_service.run_demo_rag_agent("最近要去北京出差，至少待3天，帮我规划下行程，并请帮我提供报销标准。注意出行当天往返地必须是晴天，接受顺延日期。")
+    pass

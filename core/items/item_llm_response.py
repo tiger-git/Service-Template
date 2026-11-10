@@ -1,7 +1,7 @@
 from datetime import date
 
 from pydantic import BaseModel, Field
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal, Optional, Union
 
 
 class LLMResponse(BaseModel):
@@ -13,5 +13,5 @@ class WeatherItem(BaseModel):
 
 class WeatherAgentResponse(LLMResponse):
     """LLM 回答结构化对象"""
-    data:List[WeatherItem] = Field(description="weather data")
+    data: Union[List[WeatherItem], None] = Field(default_factory=list,description="weather data")
 
